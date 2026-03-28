@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Server Rankings</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0c10;
+    --bg2: #13151c;
+    --bg3: #1b1e28;
+    --border: rgba(255,255,255,0.06);
+    --border2: rgba(255,255,255,0.1);
+    --text: #e9ecf4;
+    --muted: #5a6080;
+    --muted2: #8890b0;
+    --discord: #5865F2;
+    --discord2: #4752c4;
+    --gold: #f5c542;
+    --silver: #b8c0cc;
+    --bronze: #c87941;
+    --rank-S: #ff4757;
+    --rank-A: #ff7043;
+    --rank-B: #ffd32a;
+    --rank-C: #26de81;
+    --rank-D: #45aaf2;
+    --rank-F: #8890b0;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; min-height:100vh; overflow-x:hidden; }
+  body::before { content:''; position:fixed; top:-200px; left:50%; transform:translateX(-50%); width:800px; height:500px; background:radial-gradient(ellipse,rgba(88,101,242,0.12) 0%,transparent 70%); pointer-events:none; z-index:0; }
+
+  header { position:sticky; top:0; z-index:100; background:rgba(11,12,16,0.88); backdrop-filter:blur(16px); border-bottom:1px solid var(--border); padding:0 2rem; height:60px; display:flex; align-items:center; justify-content:space-between; }
+  .logo { font-family:'Bebas Neue',sans-serif; font-size:1.5rem; letter-spacing:.12em; display:flex; align-items:center; gap:10px; }
+  .logo-icon { width:28px; height:28px; background:var(--discord); border-radius:8px; display:flex; align-items:center; justify-content:center; }
+  .logo-icon svg { width:16px; height:16px; }
+  .header-right { display:flex; align-items:center; gap:10px; }
+  .btn-dc { background:var(--discord); color:#fff; border:none; border-radius:8px; padding:8px 16px; font-size:.82rem; font-weight:600; font-family:'DM Sans',sans-serif; cursor:pointer; display:flex; align-items:center; gap:7px; transition:background .18s,transform .1s; text-decoration:none; }
+  .btn-dc:hover { background:var(--discord2); }
+  .btn-dc:active { transform:scale(.97); }
+  .btn-dc svg { width:16px; height:16px; flex-shrink:0; }
+  .user-chip { background:var(--bg2); border:1px solid var(--border2); border-radius:20px; padding:5px 12px 5px 6px; display:flex; align-items:center; gap:8px; font-size:.83rem; font-weight:500; }
+  .avatar-sm { width:26px; height:26px; border-radius:50%; background:var(--discord); display:flex; align-items:center; justify-content:center; font-size:.7rem; font-weight:600; color:#fff; overflow:hidden; flex-shrink:0; }
+  .avatar-sm img { width:100%; height:100%; border-radius:50%; }
+  .btn-out { background:transparent; border:1px solid var(--border2); color:var(--muted2); border-radius:6px; padding:6px 10px; font-size:.78rem; font-family:'DM Sans',sans-serif; cursor:pointer; transition:color .15s; }
+  .btn-out:hover { color:var(--text); }
+
+  .page { max-width:760px; margin:0 auto; padding:0 1.5rem 5rem; position:relative; z-index:1; }
+
+  /* LOGIN */
+  #login-view { display:flex; align-items:center; justify-content:center; min-height:70vh; }
+  .login-card { background:var(--bg2); border:1px solid var(--border2); border-radius:20px; padding:3rem 2.5rem; text-align:center; max-width:360px; width:100%; }
+  .dc-logo { width:60px; height:60px; background:var(--discord); border-radius:16px; margin:0 auto 1.5rem; display:flex; align-items:center; justify-content:center; }
+  .dc-logo svg { width:34px; height:34px; }
+  .login-card h2 { font-family:'Bebas Neue',sans-serif; font-size:2rem; letter-spacing:.08em; margin-bottom:.6rem; }
+  .login-card p { color:var(--muted2); font-size:.88rem; line-height:1.65; margin-bottom:2rem; }
+  .login-card p strong { color:var(--text); }
+  .btn-dc-full { background:var(--discord); color:#fff; border:none; border-radius:10px; padding:13px; font-size:.95rem; font-weight:600; font-family:'DM Sans',sans-serif; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; width:100%; transition:background .18s,transform .1s; }
+  .btn-dc-full:hover { background:var(--discord2); }
+  .btn-dc-full:active { transform:scale(.98); }
+  .btn-dc-full svg { width:20px; height:20px; }
+
+  /* HERO */
+  .hero { padding:3rem 0 2rem; }
+  .server-badge { display:inline-flex; align-items:center; gap:7px; background:var(--bg2); border:1px solid var(--border2); border-radius:20px; padding:5px 14px; font-size:.8rem; color:var(--muted2); margin-bottom:1.2rem; }
+  .online-dot { width:7px; height:7px; border-radius:50%; background:#26de81; box-shadow:0 0 6px #26de81; animation:blink 2s ease-in-out infinite; }
+  @keyframes blink { 0%,100%{opacity:1}50%{opacity:.4} }
+  .hero h1 { font-family:'Bebas Neue',sans-serif; font-size:3.2rem; letter-spacing:.06em; line-height:1; margin-bottom:.5rem; }
+  .hero h1 em { font-style:normal; color:var(--discord); }
+  .hero-sub { color:var(--muted2); font-size:.9rem; display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+
+  /* TABS */
+  .channel-tabs { display:flex; gap:4px; background:var(--bg2); border:1px solid var(--border); border-radius:10px; padding:4px; width:fit-content; margin:1.8rem 0 .5rem; }
+  .ch-tab { padding:7px 16px; border-radius:7px; font-size:.83rem; font-weight:500; cursor:pointer; border:none; background:transparent; color:var(--muted2); font-family:'DM Sans',sans-serif; transition:all .15s; display:flex; align-items:center; gap:5px; }
+  .ch-tab.active { background:var(--bg3); color:var(--text); border:1px solid var(--border2); }
+  .ch-tab:hover:not(.active) { color:var(--text); }
+  .ch-tab .hash { opacity:.4; }
+
+  /* CONTROLS */
+  .controls { display:flex; align-items:center; justify-content:space-between; margin:1.2rem 0; gap:10px; flex-wrap:wrap; }
+  .controls-left { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .pill { background:var(--bg2); border:1px solid var(--border); border-radius:20px; padding:4px 12px; font-size:.78rem; color:var(--muted2); }
+  .btn-refresh { background:transparent; border:1px solid var(--border2); color:var(--muted2); border-radius:8px; padding:7px 13px; font-size:.8rem; font-family:'DM Sans',sans-serif; cursor:pointer; display:flex; align-items:center; gap:5px; transition:color .15s; }
+  .btn-refresh:hover { color:var(--text); }
+  .btn-refresh.spinning svg { animation:spin .6s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  /* NOTICE */
+  .notice { background:rgba(88,101,242,.07); border:1px solid rgba(88,101,242,.2); border-radius:10px; padding:12px 16px; font-size:.82rem; color:#8890cc; margin-bottom:1.2rem; line-height:1.6; }
+  .notice strong { color:#a0a8f0; }
+  .notice code { background:rgba(88,101,242,.15); padding:1px 5px; border-radius:4px; font-family:monospace; font-size:.78rem; }
+
+  /* PODIUM */
+  .podium { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:1.5rem; }
+  .podium-card { background:var(--bg2); border:1px solid var(--border); border-radius:14px; padding:1.2rem 1rem; text-align:center; position:relative; overflow:hidden; transition:border-color .2s,transform .15s; animation:fadeUp .4s ease forwards; opacity:0; }
+  .podium-card:hover { transform:translateY(-3px); }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+  .podium-card.p1 { border-color:rgba(245,197,66,.35); background:linear-gradient(160deg,rgba(245,197,66,.07) 0%,var(--bg2) 60%); animation-delay:.05s; }
+  .podium-card.p2 { border-color:rgba(184,192,204,.2); animation-delay:.1s; margin-top:18px; }
+  .podium-card.p3 { border-color:rgba(200,121,65,.2); animation-delay:.15s; margin-top:30px; }
+  .podium-rank { font-family:'Bebas Neue',sans-serif; font-size:1rem; letter-spacing:.1em; margin-bottom:.7rem; }
+  .podium-card.p1 .podium-rank { color:var(--gold); }
+  .podium-card.p2 .podium-rank { color:var(--silver); }
+  .podium-card.p3 .podium-rank { color:var(--bronze); }
+  .podium-avatar { width:56px; height:56px; border-radius:50%; margin:0 auto .75rem; background:var(--discord); display:flex; align-items:center; justify-content:center; font-weight:600; font-size:1.2rem; color:#fff; overflow:hidden; border:2px solid transparent; }
+  .podium-card.p1 .podium-avatar { border-color:var(--gold); }
+  .podium-card.p2 .podium-avatar { border-color:var(--silver); }
+  .podium-card.p3 .podium-avatar { border-color:var(--bronze); }
+  .podium-avatar img { width:100%; height:100%; border-radius:50%; }
+  .podium-name { font-weight:600; font-size:.88rem; margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .podium-score { font-size:.75rem; color:var(--muted2); }
+
+  /* RANKING LIST */
+  .ranking-list { display:flex; flex-direction:column; gap:5px; }
+  .rank-row { background:var(--bg2); border:1px solid var(--border); border-radius:11px; padding:11px 16px; display:flex; align-items:center; gap:14px; transition:border-color .15s,background .15s; animation:fadeUp .35s ease forwards; opacity:0; }
+  .rank-row:hover { border-color:rgba(88,101,242,.3); background:var(--bg3); }
+  .rank-pos { font-family:'Bebas Neue',sans-serif; font-size:1.3rem; letter-spacing:.05em; width:32px; text-align:center; flex-shrink:0; color:var(--muted); }
+  .rank-avatar { width:38px; height:38px; border-radius:50%; background:var(--discord); display:flex; align-items:center; justify-content:center; font-size:.8rem; font-weight:600; color:#fff; overflow:hidden; flex-shrink:0; }
+  .rank-avatar img { width:100%; height:100%; border-radius:50%; }
+  .rank-info { flex:1; min-width:0; }
+  .rank-name { font-weight:500; font-size:.92rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .rank-meta { font-size:.75rem; color:var(--muted2); margin-top:2px; }
+  .rank-right { display:flex; align-items:center; gap:10px; flex-shrink:0; }
+  .rank-score-val { font-family:'Bebas Neue',sans-serif; font-size:1.1rem; letter-spacing:.05em; }
+  .tier-badge { font-family:'Bebas Neue',sans-serif; font-size:.9rem; letter-spacing:.08em; padding:2px 8px; border-radius:5px; min-width:28px; text-align:center; }
+  .tier-S { background:rgba(255,71,87,.15);  color:var(--rank-S); }
+  .tier-A { background:rgba(255,112,67,.15); color:var(--rank-A); }
+  .tier-B { background:rgba(255,211,42,.15); color:var(--rank-B); }
+  .tier-C { background:rgba(38,222,129,.15); color:var(--rank-C); }
+  .tier-D { background:rgba(69,170,242,.15); color:var(--rank-D); }
+  .tier-F { background:rgba(136,144,176,.12);color:var(--rank-F); }
+
+  /* LOADING / EMPTY */
+  .loading { display:flex; align-items:center; gap:10px; color:var(--muted2); font-size:.88rem; padding:3rem; justify-content:center; }
+  .spinner { width:18px; height:18px; border:2px solid var(--border2); border-top-color:var(--discord); border-radius:50%; animation:spin .65s linear infinite; }
+  .empty { text-align:center; padding:4rem 2rem; color:var(--muted); display:flex; flex-direction:column; align-items:center; gap:12px; }
+  .empty-icon { font-size:2.5rem; opacity:.3; }
+  .empty p { font-size:.9rem; }
+
+  /* SETUP */
+  .setup-card { background:var(--bg2); border:1px solid var(--border); border-radius:14px; padding:1.5rem; margin-top:1rem; }
+  .setup-card h3 { font-family:'Bebas Neue',sans-serif; font-size:1.2rem; letter-spacing:.08em; margin-bottom:1rem; }
+  .step { display:flex; gap:12px; margin-bottom:12px; align-items:flex-start; }
+  .step-n { background:var(--discord); color:#fff; width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.7rem; font-weight:700; flex-shrink:0; margin-top:1px; }
+  .step p { font-size:.85rem; line-height:1.55; color:var(--muted2); }
+  .step p code { background:var(--bg3); color:#a0a8f0; padding:1px 5px; border-radius:4px; font-family:monospace; font-size:.78rem; }
+  .step p strong { color:var(--text); font-weight:500; }
+
+  @media (max-width:560px) {
+    header { padding:0 1rem; }
+    .page { padding:0 1rem 4rem; }
+    .hero h1 { font-size:2.2rem; }
+    .podium { gap:5px; }
+    .podium-avatar { width:44px; height:44px; font-size:.9rem; }
+    .rank-score-val { display:none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24" fill="#fff"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.1 18.08.11 18.1.132 18.11a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.027c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
+    </div>
+    SERVER RANKING
+  </div>
+  <div class="header-right">
+    <div id="hdr-user" style="display:none" class="user-chip">
+      <div class="avatar-sm" id="hdr-av">?</div>
+      <span id="hdr-name"></span>
+    </div>
+    <button id="hdr-login" class="btn-dc" onclick="doLogin()">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.1 18.08.11 18.1.132 18.11a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.027c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
+      Anmelden
+    </button>
+    <button id="hdr-logout" style="display:none" class="btn-out" onclick="doLogout()">Abmelden</button>
+  </div>
+</header>
+
+<div class="page">
+
+  <div id="login-view">
+    <div class="login-card">
+      <div class="dc-logo">
+        <svg viewBox="0 0 24 24" fill="#fff"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.1 18.08.11 18.1.132 18.11a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.027c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
+      </div>
+      <h2>Server Ranking</h2>
+      <p>Melde dich mit deinem Discord-Account an, um die Spieler-Rankings aus <strong>#result</strong> und <strong>#hieresult</strong> zu sehen.</p>
+      <button class="btn-dc-full" onclick="doLogin()">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.1 18.08.11 18.1.132 18.11a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.027c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
+        Mit Discord anmelden
+      </button>
+    </div>
+  </div>
+
+  <div id="main-view" style="display:none;">
+    <div class="hero">
+      <div class="server-badge"><div class="online-dot"></div>discord.gg/VQrXwGqBt</div>
+      <h1>SPIELER<br><em>RANKING</em></h1>
+      <div class="hero-sub">
+        <span id="stat-players">– Spieler</span>
+        <span>·</span>
+        <span id="stat-time">–</span>
+      </div>
+    </div>
+
+    <div class="channel-tabs">
+      <button class="ch-tab active" onclick="switchCh('result',this)"><span class="hash">#</span>result</button>
+      <button class="ch-tab" onclick="switchCh('hieresult',this)"><span class="hash">#</span>hieresult</button>
+      <button class="ch-tab" onclick="switchCh('all',this)">Gesamt</button>
+      <button class="ch-tab" onclick="switchCh('setup',this)">⚙ Setup</button>
+    </div>
+
+    <div id="ranking-area">
+      <div class="controls">
+        <div class="controls-left">
+          <div class="pill" id="pill-count">– Einträge</div>
+          <div class="pill" id="pill-src">Demo</div>
+        </div>
+        <button class="btn-refresh" id="btn-ref" onclick="refresh()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
+          Aktualisieren
+        </button>
+      </div>
+      <div class="notice"><strong>Demo-Modus:</strong> Zeigt Beispieldaten aus <code>#result</code> und <code>#hieresult</code>. Für echte Daten → Setup-Tab.</div>
+      <div class="podium" id="podium"></div>
+      <div class="ranking-list" id="rlist"></div>
+    </div>
+
+    <div id="setup-area" style="display:none;">
+      <div class="setup-card">
+        <h3>🤖 Discord Bot einrichten</h3>
+        <div class="step"><div class="step-n">1</div><p>Geh zu <strong>discord.com/developers/applications</strong> → neue App erstellen → Bot → Token kopieren.</p></div>
+        <div class="step"><div class="step-n">2</div><p>Bot auf deinen Server einladen mit <code>Read Messages</code> + <code>Read Message History</code> Berechtigung.</p></div>
+        <div class="step"><div class="step-n">3</div><p>Kleines Backend (z.B. Node.js) liest Nachrichten aus <code>#result</code> und <code>#hieresult</code> via Discord Bot API und parst Spielernamen + Punkte aus den Nachrichten.</p></div>
+        <div class="step"><div class="step-n">4</div><p>Backend stellt z.B. <code>GET /api/ranking?channel=result</code> bereit, das ein JSON-Array mit Spielern zurückgibt.</p></div>
+        <div class="step"><div class="step-n">5</div><p>In dieser HTML-Datei <code>DEMO: true</code> auf <code>false</code> setzen und die eigene API-URL bei <code>API_URL</code> eintragen.</p></div>
+      </div>
+      <div class="setup-card" style="margin-top:10px;">
+        <h3>🔑 Discord OAuth2 Login</h3>
+        <div class="step"><div class="step-n">1</div><p>App-Seite → <strong>OAuth2</strong> → Redirect-URI = URL dieser Seite eintragen.</p></div>
+        <div class="step"><div class="step-n">2</div><p>Client-ID kopieren und bei <code>CLIENT_ID</code> im Script eintragen.</p></div>
+        <div class="step"><div class="step-n">3</div><p>Scopes: <code>identify</code> + <code>guilds</code> – damit prüfst du ob der Nutzer auf deinem Server ist.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const CFG = {
+  CLIENT_ID: '1487488337693376563',
+  REDIRECT:  location.href.split('#')[0],
+  API_URL:   '/api',
+  DEMO:      true
+};
+
+const DEMO_DATA = {
+  result: [
+    { username:'xXShadowXx',  score:2840, color:'#5865F2', init:'XS' },
+    { username:'ProGamer99',   score:2790, color:'#ff4757', init:'PG' },
+    { username:'BlitzKrieg',   score:2340, color:'#ff6b35', init:'BK' },
+    { username:'NightOwl',     score:2200, color:'#a29bfe', init:'NO' },
+    { username:'TurboMax',     score:2050, color:'#fd79a8', init:'TM' },
+    { username:'DragonFly',    score:1760, color:'#00cec9', init:'DF' },
+    { username:'CoolKid47',    score:1640, color:'#6c5ce7', init:'CK' },
+    { username:'SwiftArrow',   score:1580, color:'#e17055', init:'SA' },
+    { username:'IceQueen',     score:1200, color:'#74b9ff', init:'IQ' },
+    { username:'SilverBolt',   score:1100, color:'#81ecec', init:'SB' },
+    { username:'GoldenEagle',  score:720,  color:'#fdcb6e', init:'GE' },
+    { username:'NewPlayer01',  score:120,  color:'#636e72', init:'NP' },
+  ],
+  hieresult: [
+    { username:'UltraGod',     score:3200, color:'#e84393', init:'UG' },
+    { username:'MegaKing',     score:3050, color:'#a55eea', init:'MK' },
+    { username:'xXShadowXx',   score:2840, color:'#5865F2', init:'XS' },
+    { username:'StrikeForce',  score:2400, color:'#45aaf2', init:'SF' },
+    { username:'PhantomX',     score:2100, color:'#26de81', init:'PX' },
+    { username:'TurboMax',     score:2050, color:'#fd79a8', init:'TM' },
+    { username:'FrostByte',    score:1880, color:'#4bcffa', init:'FB' },
+    { username:'NightOwl',     score:1750, color:'#a29bfe', init:'NO' },
+  ]
+};
+
+let user = null, channel = 'result', players = [];
+
+function getTier(rank, total) {
+  if (!total) return 'F';
+  const p = rank / total;
+  if (p <= .05) return 'S';
+  if (p <= .20) return 'A';
+  if (p <= .45) return 'B';
+  if (p <= .70) return 'C';
+  if (p <= .90) return 'D';
+  return 'F';
+}
+
+// AUTH
+function doLogin() {
+  if (CFG.CLIENT_ID === 'DEINE_CLIENT_ID') { demoUser(); return; }
+  const p = new URLSearchParams({ client_id:CFG.CLIENT_ID, redirect_uri:CFG.REDIRECT, response_type:'token', scope:'identify guilds' });
+  location.href = 'https://discord.com/api/oauth2/authorize?' + p;
+}
+
+function demoUser() {
+  user = { username:'DemoUser', init:'DU', color:'#5865F2' };
+  showMain();
+}
+
+function doLogout() {
+  localStorage.removeItem('dc_tok');
+  user = null;
+  document.getElementById('main-view').style.display = 'none';
+  document.getElementById('login-view').style.display = 'flex';
+  document.getElementById('hdr-user').style.display = 'none';
+  document.getElementById('hdr-login').style.display = 'flex';
+  document.getElementById('hdr-logout').style.display = 'none';
+}
+
+async function fetchUser(token) {
+  try {
+    const r = await fetch('https://discord.com/api/users/@me', { headers:{ Authorization:'Bearer '+token } });
+    const u = await r.json();
+    if (!u.username) throw 0;
+    user = { username:u.username, init:u.username.slice(0,2).toUpperCase(), color:'#5865F2',
+             avatar: u.avatar ? `https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.png` : null };
+    showMain();
+  } catch { demoUser(); }
+}
+
+function showMain() {
+  document.getElementById('login-view').style.display = 'none';
+  document.getElementById('main-view').style.display = 'block';
+  document.getElementById('hdr-login').style.display = 'none';
+  document.getElementById('hdr-user').style.display = 'flex';
+  document.getElementById('hdr-logout').style.display = 'block';
+  const av = document.getElementById('hdr-av');
+  if (user.avatar) av.innerHTML = `<img src="${user.avatar}">`;
+  else av.textContent = user.init;
+  document.getElementById('hdr-name').textContent = user.username;
+  loadData();
+}
+
+// CHANNEL
+function switchCh(ch, el) {
+  document.querySelectorAll('.ch-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  channel = ch;
+  const isSetup = ch === 'setup';
+  document.getElementById('ranking-area').style.display = isSetup ? 'none' : 'block';
+  document.getElementById('setup-area').style.display   = isSetup ? 'block' : 'none';
+  if (!isSetup) loadData();
+}
+
+// DATA
+async function loadData() {
+  if (CFG.DEMO) { buildView(getDemoData()); return; }
+  try {
+    const url = channel === 'all' ? CFG.API_URL+'/ranking' : CFG.API_URL+'/ranking?channel='+channel;
+    const r = await fetch(url);
+    buildView(await r.json());
+  } catch { buildView(getDemoData()); }
+}
+
+function getDemoData() {
+  if (channel === 'all') {
+    const m = {};
+    [...DEMO_DATA.result, ...DEMO_DATA.hieresult].forEach(p => {
+      if (!m[p.username] || p.score > m[p.username].score) m[p.username] = p;
+    });
+    return Object.values(m).sort((a,b)=>b.score-a.score);
+  }
+  return (DEMO_DATA[channel]||[]).slice().sort((a,b)=>b.score-a.score);
+}
+
+function buildView(data) {
+  players = data.map((p,i)=>({ ...p, rank:i+1, tier:getTier(i+1, data.length) }));
+  const n = players.length;
+  document.getElementById('stat-players').textContent = n + ' Spieler';
+  document.getElementById('stat-time').textContent = new Date().toLocaleTimeString('de-DE');
+  document.getElementById('pill-count').textContent = n + ' Einträge';
+  document.getElementById('pill-src').textContent = CFG.DEMO ? 'Demo' : '#'+channel;
+  renderPodium(players.slice(0,3));
+  renderList(players.slice(3));
+}
+
+function refresh() {
+  const btn = document.getElementById('btn-ref');
+  btn.classList.add('spinning');
+  document.getElementById('podium').innerHTML = '<div class="loading"><div class="spinner"></div> Lade...</div>';
+  document.getElementById('rlist').innerHTML = '';
+  setTimeout(()=>{ btn.classList.remove('spinning'); loadData(); }, 700);
+}
+
+// RENDER
+function renderPodium(top) {
+  const el = document.getElementById('podium');
+  el.innerHTML = '';
+  if (!top.length) return;
+  const medals = ['','🥇','🥈','🥉'];
+  const cls    = ['','p1','p2','p3'];
+  const order  = top.length >= 2 ? [1,0,2] : [0];
+
+  order.forEach(i => {
+    if (i >= top.length) { el.appendChild(document.createElement('div')); return; }
+    const p = top[i];
+    const pos = i+1;
+    const card = document.createElement('div');
+    card.className = 'podium-card '+cls[pos];
+    card.innerHTML = `
+      <div class="podium-rank">${medals[pos]} PLATZ ${pos}</div>
+      <div class="podium-avatar" style="background:${p.color||'#5865F2'}">${p.avatar?`<img src="${p.avatar}">`:(p.init||'?')}</div>
+      <div class="podium-name">${esc(p.username)}</div>
+      <div class="podium-score">${p.score?p.score.toLocaleString('de-DE')+' Pkt.':'–'}</div>
+      <div class="tier-badge tier-${p.tier}" style="margin-top:6px;">${p.tier}</div>
+    `;
+    el.appendChild(card);
+  });
+}
+
+function renderList(rest) {
+  const el = document.getElementById('rlist');
+  el.innerHTML = '';
+  if (!rest.length) return;
+  rest.forEach((p,i)=>{
+    const row = document.createElement('div');
+    row.className = 'rank-row';
+    row.style.animationDelay = (i*.04)+'s';
+    row.innerHTML = `
+      <div class="rank-pos">${p.rank}</div>
+      <div class="rank-avatar" style="background:${p.color||'#5865F2'}">${p.avatar?`<img src="${p.avatar}">`:(p.init||'?')}</div>
+      <div class="rank-info">
+        <div class="rank-name">${esc(p.username)}</div>
+        ${p.score?`<div class="rank-meta">${p.score.toLocaleString('de-DE')} Punkte</div>`:''}
+      </div>
+      <div class="rank-right">
+        ${p.score?`<div class="rank-score-val">${p.score.toLocaleString('de-DE')}</div>`:''}
+        <div class="tier-badge tier-${p.tier}">${p.tier}</div>
+      </div>
+    `;
+    el.appendChild(row);
+  });
+}
+
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// INIT
+(function(){
+  const hash   = location.hash.slice(1);
+  const params = new URLSearchParams(hash);
+  const token  = params.get('access_token');
+  if (token) { localStorage.setItem('dc_tok',token); history.replaceState({},'',' '); fetchUser(token); return; }
+  const saved = localStorage.getItem('dc_tok');
+  if (saved) { fetchUser(saved); return; }
+})();
+</script>
+</body>
+</html>
